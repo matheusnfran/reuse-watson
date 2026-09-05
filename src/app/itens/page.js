@@ -1,59 +1,31 @@
 import Link from "next/link";
-
-const itens = [
-  {
-    id: 1,
-    nome: "Cadeira de Escritório",
-    categoria: "Móveis",
-    estado: "Bom estado",
-    localizacao: "São Paulo, SP",
-    emoji: "🪑",
-  },
-  {
-    id: 2,
-    nome: "Notebook",
-    categoria: "Eletrônicos",
-    estado: "Usado",
-    localizacao: "São Paulo, SP",
-    emoji: "💻",
-  },
-  {
-    id: 3,
-    nome: "Livro de Design",
-    categoria: "Livros",
-    estado: "Ótimo estado",
-    localizacao: "Osasco, SP",
-    emoji: "📚",
-  },
-  {
-    id: 4,
-    nome: "Jaqueta Jeans",
-    categoria: "Roupas",
-    estado: "Bom estado",
-    localizacao: "Barueri, SP",
-    emoji: "👕",
-  },
-  {
-    id: 5,
-    nome: "Luminária de Mesa",
-    categoria: "Móveis",
-    estado: "Ótimo estado",
-    localizacao: "São Paulo, SP",
-    emoji: "💡",
-  },
-  {
-    id: 6,
-    nome: "Fone de Ouvido",
-    categoria: "Eletrônicos",
-    estado: "Bom estado",
-    localizacao: "Guarulhos, SP",
-    emoji: "🎧",
-  },
-];
+import prisma from "@/lib/prisma";
 
 const categorias = ["Todos", "Eletrônicos", "Roupas", "Móveis", "Livros"];
 
-export default function ItensPage() {
+function getEmoji(nome) {
+  const emojis = {
+    "Cadeira de Escritório": "🪑",
+    Notebook: "💻",
+    "Livro de Design": "📚",
+    "Jaqueta Jeans": "👕",
+    "Luminária de Mesa": "💡",
+    "Fone de Ouvido": "🎧",
+  };
+
+  return emojis[nome] || "♻️";
+}
+
+export default async function ItensPage() {
+  const itens = await prisma.item.findMany({
+    include: {
+      categoria: true,
+    },
+    orderBy: {
+      id: "asc",
+    },
+  });
+
   return (
     <main className="min-h-screen bg-[#F4EFE8]">
       <header className="border-b border-black/5 bg-white">
@@ -121,7 +93,7 @@ export default function ItensPage() {
               className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
               <div className="relative flex h-52 items-center justify-center bg-[#E7E1D8]">
-                <span className="text-7xl">{item.emoji}</span>
+                <span className="text-7xl">{getEmoji(item.nome)}</span>
 
                 <button
                   aria-label={`Favoritar ${item.nome}`}
@@ -133,7 +105,7 @@ export default function ItensPage() {
 
               <div className="p-5">
                 <span className="text-sm font-medium text-[#0D5C3F]">
-                  {item.categoria}
+                  {item.categoria.nome}
                 </span>
 
                 <h2 className="mt-1 text-xl font-semibold text-gray-900">
@@ -141,7 +113,7 @@ export default function ItensPage() {
                 </h2>
 
                 <p className="mt-2 text-sm text-gray-600">
-                  {item.estado}
+                  {item.estadoConservacao}
                 </p>
 
                 <p className="mt-1 text-sm text-gray-500">

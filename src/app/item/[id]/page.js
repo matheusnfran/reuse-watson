@@ -1,78 +1,31 @@
 import Link from "next/link";
+import prisma from "@/lib/prisma";
 
-const itens = [
-  {
-    id: 1,
-    nome: "Cadeira de Escritório",
-    categoria: "Móveis",
-    estado: "Bom estado",
-    localizacao: "São Paulo, SP",
-    emoji: "🪑",
-    descricao:
-      "Cadeira de escritório confortável e em bom estado de conservação. Possui pequenos sinais de uso, mas está funcionando perfeitamente.",
-    usuario: "Mariana Silva",
-  },
-  {
-    id: 2,
-    nome: "Notebook",
-    categoria: "Eletrônicos",
-    estado: "Usado",
-    localizacao: "São Paulo, SP",
-    emoji: "💻",
-    descricao:
-      "Notebook usado e funcionando normalmente. Ideal para estudos, tarefas do dia a dia e navegação na internet.",
-    usuario: "Carlos Oliveira",
-  },
-  {
-    id: 3,
-    nome: "Livro de Design",
-    categoria: "Livros",
-    estado: "Ótimo estado",
-    localizacao: "Osasco, SP",
-    emoji: "📚",
-    descricao:
-      "Livro sobre fundamentos de design, conservado e sem páginas rasgadas ou anotações.",
-    usuario: "Ana Souza",
-  },
-  {
-    id: 4,
-    nome: "Jaqueta Jeans",
-    categoria: "Roupas",
-    estado: "Bom estado",
-    localizacao: "Barueri, SP",
-    emoji: "👕",
-    descricao:
-      "Jaqueta jeans em bom estado, pouco utilizada e sem manchas ou rasgos.",
-    usuario: "Lucas Santos",
-  },
-  {
-    id: 5,
-    nome: "Luminária de Mesa",
-    categoria: "Móveis",
-    estado: "Ótimo estado",
-    localizacao: "São Paulo, SP",
-    emoji: "💡",
-    descricao:
-      "Luminária de mesa em ótimo estado e funcionando normalmente.",
-    usuario: "Fernanda Lima",
-  },
-  {
-    id: 6,
-    nome: "Fone de Ouvido",
-    categoria: "Eletrônicos",
-    estado: "Bom estado",
-    localizacao: "Guarulhos, SP",
-    emoji: "🎧",
-    descricao:
-      "Fone de ouvido em bom estado de conservação, com funcionamento normal.",
-    usuario: "Rafael Costa",
-  },
-];
+function getEmoji(nome) {
+  const emojis = {
+    "Cadeira de Escritório": "🪑",
+    Notebook: "💻",
+    "Livro de Design": "📚",
+    "Jaqueta Jeans": "👕",
+    "Luminária de Mesa": "💡",
+    "Fone de Ouvido": "🎧",
+  };
+
+  return emojis[nome] || "♻️";
+}
 
 export default async function ProdutoPage({ params }) {
   const { id } = await params;
 
-  const item = itens.find((item) => item.id === Number(id));
+  const item = await prisma.item.findUnique({
+    where: {
+      id: Number(id),
+    },
+    include: {
+      categoria: true,
+      usuario: true,
+    },
+  });
 
   if (!item) {
     return (
@@ -129,12 +82,12 @@ export default async function ProdutoPage({ params }) {
 
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-sm md:grid-cols-2">
           <div className="flex min-h-[420px] items-center justify-center bg-[#E7E1D8]">
-            <span className="text-9xl">{item.emoji}</span>
+            <span className="text-9xl">{getEmoji(item.nome)}</span>
           </div>
 
           <div className="p-8 md:p-10">
             <span className="font-medium text-[#0D5C3F]">
-              {item.categoria}
+              {item.categoria.nome}
             </span>
 
             <h1 className="mt-2 text-3xl font-bold text-gray-900">
@@ -143,7 +96,7 @@ export default async function ProdutoPage({ params }) {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <span className="rounded-full bg-[#F4EFE8] px-4 py-2 text-sm text-gray-700">
-                {item.estado}
+                {item.estadoConservacao}
               </span>
 
               <span className="rounded-full bg-[#F4EFE8] px-4 py-2 text-sm text-gray-700">
@@ -167,7 +120,7 @@ export default async function ProdutoPage({ params }) {
               </p>
 
               <p className="mt-1 font-semibold text-gray-900">
-                {item.usuario}
+                {item.usuario.nome}
               </p>
             </div>
 
