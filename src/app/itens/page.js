@@ -1,5 +1,11 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import {
+  favoritarItem,
+  removerFavorito,
+} from "@/app/actions/favoritos";
+
+const USUARIO_TESTE_ID = 1;
 
 const categorias = ["Todos", "Eletrônicos", "Roupas", "Móveis", "Livros"];
 
@@ -20,6 +26,11 @@ export default async function ItensPage() {
   const itens = await prisma.item.findMany({
     include: {
       categoria: true,
+      favoritos: {
+        where: {
+          usuarioId: USUARIO_TESTE_ID,
+        },
+      },
     },
     orderBy: {
       id: "asc",
@@ -87,48 +98,74 @@ export default async function ItensPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {itens.map((item) => (
-            <article
-              key={item.id}
-              className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="relative flex h-52 items-center justify-center bg-[#E7E1D8]">
-                <span className="text-7xl">{getEmoji(item.nome)}</span>
+          {itens.map((item) => {
+            const estaFavoritado = item.favoritos.length > 0;
 
-                <button
-                  aria-label={`Favoritar ${item.nome}`}
-                  className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm transition hover:text-red-500"
-                >
-                  ♡
-                </button>
-              </div>
+            return (
+              <article
+                key={item.id}
+                className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="relative flex h-52 items-center justify-center bg-[#E7E1D8]">
+                  <span className="text-7xl">{getEmoji(item.nome)}</span>
 
-              <div className="p-5">
-                <span className="text-sm font-medium text-[#0D5C3F]">
-                  {item.categoria.nome}
-                </span>
+                  <form
+                    action={async () => {
+                      "use server";
 
-                <h2 className="mt-1 text-xl font-semibold text-gray-900">
-                  {item.nome}
-                </h2>
+                      if (estaFavoritado) {
+                        await removerFavorito(item.id);
+                      } else {
+                        await favoritarItem(item.id);
+                      }
+                    }}
+                    className="absolute right-4 top-4"
+                  >
+                    <button
+                      type="submit"
+                      aria-label={
+                        estaFavoritado
+                          ? `Remover ${item.nome} dos favoritos`
+                          : `Favoritar ${item.nome}`
+                      }
+                      className={
+                        estaFavoritado
+                          ? "flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl text-red-500 shadow-sm"
+                          : "flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm transition hover:text-red-500"
+                      }
+                    >
+                      {estaFavoritado ? "♥" : "♡"}
+                    </button>
+                  </form>
+                </div>
 
-                <p className="mt-2 text-sm text-gray-600">
-                  {item.estadoConservacao}
-                </p>
+                <div className="p-5">
+                  <span className="text-sm font-medium text-[#0D5C3F]">
+                    {item.categoria.nome}
+                  </span>
 
-                <p className="mt-1 text-sm text-gray-500">
-                  {item.localizacao}
-                </p>
+                  <h2 className="mt-1 text-xl font-semibold text-gray-900">
+                    {item.nome}
+                  </h2>
 
-                <Link
-                  href={`/item/${item.id}`}
-                  className="mt-5 block rounded-xl border border-[#0D5C3F] px-4 py-2.5 text-center font-medium text-[#0D5C3F] transition hover:bg-[#0D5C3F] hover:text-white"
-                >
-                  Ver produto
-                </Link>
-              </div>
-            </article>
-          ))}
+                  <p className="mt-2 text-sm text-gray-600">
+                    {item.estadoConservacao}
+                  </p>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    {item.localizacao}
+                  </p>
+
+                  <Link
+                    href={`/item/${item.id}`}
+                    className="mt-5 block rounded-xl border border-[#0D5C3F] px-4 py-2.5 text-center font-medium text-[#0D5C3F] transition hover:bg-[#0D5C3F] hover:text-white"
+                  >
+                    Ver produto
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
     </main>
