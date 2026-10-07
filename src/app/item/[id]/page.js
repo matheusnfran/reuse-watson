@@ -1,5 +1,11 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import {
+  favoritarItem,
+  removerFavorito,
+} from "@/app/actions/favoritos";
+
+const USUARIO_TESTE_ID = 1;
 
 function getEmoji(nome) {
   const emojis = {
@@ -24,6 +30,11 @@ export default async function ProdutoPage({ params }) {
     include: {
       categoria: true,
       usuario: true,
+      favoritos: {
+        where: {
+          usuarioId: USUARIO_TESTE_ID,
+        },
+      },
     },
   });
 
@@ -46,6 +57,8 @@ export default async function ProdutoPage({ params }) {
     );
   }
 
+  const estaFavoritado = item.favoritos.length > 0;
+
   return (
     <main className="min-h-screen bg-[#F4EFE8]">
       <header className="border-b border-black/5 bg-white">
@@ -57,14 +70,14 @@ export default async function ProdutoPage({ params }) {
           <nav className="flex items-center gap-6">
             <Link
               href="/itens"
-              className="font-medium text-gray-600 hover:text-[#0D5C3F]"
+              className="font-medium text-gray-600 transition hover:text-[#0D5C3F]"
             >
               Itens
             </Link>
 
             <Link
               href="/favoritos"
-              className="font-medium text-gray-600 hover:text-[#0D5C3F]"
+              className="font-medium text-gray-600 transition hover:text-[#0D5C3F]"
             >
               ♡ Favoritos
             </Link>
@@ -82,7 +95,9 @@ export default async function ProdutoPage({ params }) {
 
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-sm md:grid-cols-2">
           <div className="flex min-h-[420px] items-center justify-center bg-[#E7E1D8]">
-            <span className="text-9xl">{getEmoji(item.nome)}</span>
+            <span className="text-9xl" aria-hidden="true">
+              {getEmoji(item.nome)}
+            </span>
           </div>
 
           <div className="p-8 md:p-10">
@@ -105,9 +120,7 @@ export default async function ProdutoPage({ params }) {
             </div>
 
             <div className="mt-8">
-              <h2 className="font-semibold text-gray-900">
-                Descrição
-              </h2>
+              <h2 className="font-semibold text-gray-900">Descrição</h2>
 
               <p className="mt-2 leading-7 text-gray-600">
                 {item.descricao}
@@ -124,15 +137,36 @@ export default async function ProdutoPage({ params }) {
               </p>
             </div>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button className="rounded-xl border border-[#0D5C3F] px-5 py-3 font-semibold text-[#0D5C3F] transition hover:bg-[#0D5C3F]/5">
-                Tenho interesse
-              </button>
+            <form
+              action={async () => {
+                "use server";
 
-              <button className="rounded-xl bg-[#0D5C3F] px-5 py-3 font-semibold text-white transition hover:bg-[#0a4932]">
-                Trocar / Solicitar
+                if (estaFavoritado) {
+                  await removerFavorito(item.id);
+                } else {
+                  await favoritarItem(item.id);
+                }
+              }}
+              className="mt-8"
+            >
+              <button
+                type="submit"
+                aria-label={
+                  estaFavoritado
+                    ? `Remover ${item.nome} dos favoritos`
+                    : `Adicionar ${item.nome} aos favoritos`
+                }
+                className={
+                  estaFavoritado
+                    ? "w-full rounded-xl bg-[#0D5C3F] px-5 py-3 font-semibold text-white transition hover:bg-[#0a4932]"
+                    : "w-full rounded-xl border border-[#0D5C3F] px-5 py-3 font-semibold text-[#0D5C3F] transition hover:bg-[#0D5C3F] hover:text-white"
+                }
+              >
+                {estaFavoritado
+                  ? "♥ Remover dos favoritos"
+                  : "♡ Adicionar aos favoritos"}
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </section>
