@@ -1,4 +1,6 @@
+
 import Link from "next/link";
+import Image from "next/image";
 import prisma from "@/lib/prisma";
 import {
   favoritarItem,
@@ -7,17 +9,17 @@ import {
 
 const USUARIO_TESTE_ID = 1;
 
-function getEmoji(nome) {
-  const emojis = {
-    "Cadeira de Escritório": "🪑",
-    Notebook: "💻",
-    "Livro de Design": "📚",
-    "Jaqueta Jeans": "👕",
-    "Luminária de Mesa": "💡",
-    "Fone de Ouvido": "🎧",
+function getImagem(nome) {
+  const imagens = {
+    "Cadeira de Escritório": "/produtos/cadeira.webp",
+    Notebook: "/produtos/notebook.webp",
+    "Livro de Design": "/produtos/livro.jpg",
+    "Jaqueta Jeans": "/produtos/jaqueta.webp",
+    "Luminária de Mesa": "/produtos/luminaria.webp",
+    "Fone de Ouvido": "/produtos/fone.PNG",
   };
 
-  return emojis[nome] || "♻️";
+  return imagens[nome] || null;
 }
 
 export default async function ProdutoPage({ params }) {
@@ -58,12 +60,16 @@ export default async function ProdutoPage({ params }) {
   }
 
   const estaFavoritado = item.favoritos.length > 0;
+  const imagem = getImagem(item.nome);
 
   return (
     <main className="min-h-screen bg-[#F4EFE8]">
       <header className="border-b border-black/5 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link href="/itens" className="text-3xl font-bold text-[#0D5C3F]">
+          <Link
+            href="/itens"
+            className="text-3xl font-bold text-[#0D5C3F]"
+          >
             ReUse!
           </Link>
 
@@ -94,10 +100,26 @@ export default async function ProdutoPage({ params }) {
         </Link>
 
         <div className="grid overflow-hidden rounded-3xl bg-white shadow-sm md:grid-cols-2">
-          <div className="flex min-h-[420px] items-center justify-center bg-[#E7E1D8]">
-            <span className="text-9xl" aria-hidden="true">
-              {getEmoji(item.nome)}
-            </span>
+          <div className="relative min-h-[360px] bg-[#E7E1D8] md:min-h-[480px]">
+            {imagem ? (
+              <Image
+                src={imagem}
+                alt={`Foto do produto ${item.nome}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <div className="flex h-full min-h-[360px] items-center justify-center">
+                <span
+                  className="text-8xl"
+                  aria-hidden="true"
+                >
+                  ♻️
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="p-8 md:p-10">
@@ -120,7 +142,9 @@ export default async function ProdutoPage({ params }) {
             </div>
 
             <div className="mt-8">
-              <h2 className="font-semibold text-gray-900">Descrição</h2>
+              <h2 className="font-semibold text-gray-900">
+                Descrição
+              </h2>
 
               <p className="mt-2 leading-7 text-gray-600">
                 {item.descricao}

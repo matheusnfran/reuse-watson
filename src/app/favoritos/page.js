@@ -1,20 +1,22 @@
+
 import Link from "next/link";
+import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { removerFavorito } from "@/app/actions/favoritos";
 
 const USUARIO_TESTE_ID = 1;
 
-function getEmoji(nome) {
-  const emojis = {
-    "Cadeira de Escritório": "🪑",
-    Notebook: "💻",
-    "Livro de Design": "📚",
-    "Jaqueta Jeans": "👕",
-    "Luminária de Mesa": "💡",
-    "Fone de Ouvido": "🎧",
+function getImagem(nome) {
+  const imagens = {
+    "Cadeira de Escritório": "/produtos/cadeira.webp",
+    Notebook: "/produtos/notebook.webp",
+    "Livro de Design": "/produtos/livro.jpg",
+    "Jaqueta Jeans": "/produtos/jaqueta.webp",
+    "Luminária de Mesa": "/produtos/luminaria.webp",
+    "Fone de Ouvido": "/produtos/fone.PNG",
   };
 
-  return emojis[nome] || "♻️";
+  return imagens[nome] || null;
 }
 
 export default async function FavoritosPage() {
@@ -38,7 +40,10 @@ export default async function FavoritosPage() {
     <main className="min-h-screen bg-[#F4EFE8]">
       <header className="border-b border-black/5 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link href="/itens" className="text-3xl font-bold text-[#0D5C3F]">
+          <Link
+            href="/itens"
+            className="text-3xl font-bold text-[#0D5C3F]"
+          >
             ReUse!
           </Link>
 
@@ -73,15 +78,20 @@ export default async function FavoritosPage() {
 
         {favoritos.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 bg-white px-6 py-16 text-center">
-            <div className="text-5xl text-[#0D5C3F]">♡</div>
+            <div
+              className="text-5xl text-[#0D5C3F]"
+              aria-hidden="true"
+            >
+              ♡
+            </div>
 
             <h2 className="mt-4 text-xl font-semibold text-gray-900">
               Nenhum item favoritado
             </h2>
 
             <p className="mx-auto mt-2 max-w-md text-gray-600">
-              Explore os itens disponíveis e clique no coração para salvar os que
-              mais interessarem a você.
+              Explore os itens disponíveis e clique no coração
+              para salvar os que mais interessarem a você.
             </p>
 
             <Link
@@ -95,14 +105,32 @@ export default async function FavoritosPage() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {favoritos.map((favorito) => {
               const item = favorito.item;
+              const imagem = getImagem(item.nome);
 
               return (
                 <article
                   key={favorito.id}
-                  className="overflow-hidden rounded-2xl bg-white shadow-sm"
+                  className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                 >
-                  <div className="flex h-52 items-center justify-center bg-[#E7E1D8]">
-                    <span className="text-7xl">{getEmoji(item.nome)}</span>
+                  <div className="relative h-52 overflow-hidden bg-[#E7E1D8]">
+                    {imagem ? (
+                      <Image
+                        src={imagem}
+                        alt={`Foto do produto ${item.nome}`}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <span
+                          className="text-7xl"
+                          aria-hidden="true"
+                        >
+                          ♻️
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-5">
@@ -138,6 +166,7 @@ export default async function FavoritosPage() {
                       >
                         <button
                           type="submit"
+                          aria-label={`Remover ${item.nome} dos favoritos`}
                           className="w-full rounded-xl bg-[#0D5C3F] px-4 py-2.5 font-medium text-white transition hover:bg-[#0a4932]"
                         >
                           Remover dos favoritos
