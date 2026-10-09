@@ -68,9 +68,17 @@ export default async function ProdutoPage({ params }) {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <Link
             href="/itens"
-            className="text-3xl font-bold text-[#0D5C3F]"
+            aria-label="ReUse - Ir para itens disponíveis"
+            className="flex items-center"
           >
-            ReUse!
+            <Image
+              src="/produtos/reuselogo1.png"
+              alt="Logo ReUse"
+              width={190}
+              height={55}
+              priority
+              className="h-auto w-[150px] sm:w-[190px]"
+            />
           </Link>
 
           <nav className="flex items-center gap-6">

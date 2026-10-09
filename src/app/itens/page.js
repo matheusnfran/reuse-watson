@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
+import BuscaItens from "@/app/components/BuscaItens";
 import {
   favoritarItem,
   removerFavorito,
@@ -70,15 +71,23 @@ export default async function ItensPage({ searchParams }) {
   return (
     <main className="min-h-screen bg-[#F4EFE8]">
       <header className="border-b border-black/5 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link
             href="/itens"
-            className="text-3xl font-bold text-[#0D5C3F]"
+            aria-label="ReUse - Página de itens"
+            className="flex shrink-0 items-center"
           >
-            ReUse!
+            <Image
+              src="/produtos/reuselogo1.png"
+              alt="Logo ReUse"
+              width={180}
+              height={60}
+              priority
+              className="h-auto w-36 sm:w-44"
+            />
           </Link>
 
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-4 sm:gap-6">
             <Link
               href="/itens"
               className="font-medium text-[#0D5C3F]"
@@ -109,14 +118,7 @@ export default async function ItensPage({ searchParams }) {
 
         <form method="GET" className="mb-8">
           <div className="flex flex-col gap-4 md:flex-row">
-            <input
-              type="search"
-              name="busca"
-              defaultValue={busca}
-              placeholder="Buscar itens..."
-              aria-label="Buscar itens"
-              className="w-full rounded-xl border border-gray-300 bg-white px-5 py-3 outline-none transition focus:border-[#0D5C3F] focus:ring-2 focus:ring-[#0D5C3F]/20"
-            />
+            <BuscaItens busca={busca} categoria={categoria} />
 
             {categoria && (
               <input
