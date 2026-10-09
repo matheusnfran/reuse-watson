@@ -1,0 +1,82 @@
+
+openapi: 3.0.3
+
+info:
+  title: ReUse - API do Assistente Virtual
+  version: 1.0.0
+  description: >
+    API da plataforma ReUse para consulta de produtos
+    cadastrados no banco de dados PostgreSQL.
+    Desenvolvida para integracao com IBM watsonx Orchestrate.
+
+servers:
+  - url: https://reuse-watson.vercel.app
+    description: API publica do projeto ReUse Watson
+
+paths:
+  /api/assistant/produtos:
+    get:
+      operationId: consultarProdutosReUse
+      summary: Consultar produtos cadastrados no ReUse
+      description: >
+        Consulta produtos reais da plataforma ReUse.
+        Quando o usuario informar um nome ou palavra-chave,
+        utilize o parametro busca para filtrar os resultados.
+        Quando nao informar um nome, retorne a lista de produtos.
+        Nunca invente produtos que nao estejam na resposta da API.
+
+      parameters:
+        - name: busca
+          in: query
+          required: false
+          description: Nome ou palavra-chave para pesquisar produtos.
+          schema:
+            type: string
+
+      security:
+        - ReUseApiKey: []
+
+      responses:
+        "200":
+          description: Consulta realizada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sucesso:
+                    type: boolean
+                  quantidade:
+                    type: integer
+                  produtos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nome:
+                          type: string
+
+        "401":
+          description: Acesso nao autorizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sucesso:
+                    type: boolean
+                  mensagem:
+                    type: string
+
+        "500":
+          description: Erro interno ao consultar produtos.
+
+components:
+  securitySchemes:
+    ReUseApiKey:
+      type: apiKey
+      in: header
+      name: X-ReUse-Extension-Key
+      description: Chave privada de acesso a API do ReUse.

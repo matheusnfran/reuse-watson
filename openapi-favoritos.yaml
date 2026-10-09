@@ -1,0 +1,63 @@
+
+openapi: 3.0.3
+
+info:
+  title: ReUse - Consulta de Favoritos
+  version: 1.0.0
+  description: API para consultar os produtos favoritados pelo usuario de demonstracao do ReUse.
+
+servers:
+  - url: https://reuse-watson.vercel.app
+
+paths:
+  /api/assistant/favoritos:
+    get:
+      operationId: consultar_favoritos_reuse
+      summary: Consultar favoritos cadastrados no ReUse
+      description: >
+        Consulta os produtos realmente favoritados pelo usuario de demonstracao
+        na plataforma ReUse. Utilize esta ferramenta quando o usuario perguntar
+        quais produtos estao em seus favoritos ou solicitar sua lista de favoritos.
+        Se a lista estiver vazia, informe que nao existem produtos favoritados.
+        Nao invente produtos nem afirme que adicionou ou removeu favoritos.
+      responses:
+        "200":
+          description: Lista de favoritos consultada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sucesso:
+                    type: boolean
+                  quantidade:
+                    type: integer
+                  favoritos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        nome:
+                          type: string
+                        categoria:
+                          type: string
+                        estadoConservacao:
+                          type: string
+                        localizacao:
+                          type: string
+        "401":
+          description: Acesso nao autorizado.
+        "500":
+          description: Erro interno ao consultar favoritos.
+
+      security:
+        - ReUseApiKey: []
+
+components:
+  securitySchemes:
+    ReUseApiKey:
+      type: apiKey
+      in: header
+      name: X-ReUse-Extension-Key
