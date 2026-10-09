@@ -1,0 +1,108 @@
+
+openapi: 3.0.3
+
+info:
+  title: ReUse - Remover Favorito
+  version: 1.0.0
+  description: >
+    API para remover um produto dos favoritos do usuario de
+    demonstracao da plataforma ReUse. A remocao exige
+    confirmacao explicita do usuario.
+
+servers:
+  - url: https://reuse-watson.vercel.app
+
+paths:
+  /api/assistant/favoritos/remover:
+    post:
+      operationId: remover_favorito_reuse
+      summary: Remover produto dos favoritos no ReUse
+      description: >
+        Remove um produto real da lista de favoritos do usuario
+        de demonstracao do ReUse.
+
+        IMPORTANTE: Esta operacao modifica o banco de dados.
+        Antes de executar a ferramenta, consulte os favoritos
+        cadastrados para identificar o produto e seu ID.
+        Pergunte explicitamente ao usuario se deseja remover
+        o produto identificado e aguarde uma resposta afirmativa.
+
+        Somente depois dessa confirmacao, execute esta
+        ferramenta com confirmado igual a true.
+
+        Nunca presuma que o usuario confirmou.
+        Nunca execute esta ferramenta apenas porque o usuario
+        perguntou como remover um favorito.
+        Se o usuario desistir ou negar a confirmacao,
+        nao execute a remocao.
+
+        Informe que o produto foi removido somente quando
+        a API retornar sucesso igual a true.
+
+      security:
+        - ReUseApiKey: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - itemId
+                - confirmado
+              properties:
+                itemId:
+                  type: integer
+                  minimum: 1
+                  description: >
+                    ID numerico do produto que o usuario
+                    confirmou que deseja remover dos favoritos.
+                confirmado:
+                  type: boolean
+                  description: >
+                    Deve ser true somente apos o usuario
+                    confirmar explicitamente a remocao.
+            example:
+              itemId: 2
+              confirmado: true
+
+      responses:
+        "200":
+          description: Produto removido com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sucesso:
+                    type: boolean
+                  mensagem:
+                    type: string
+                  produtoRemovido:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      nome:
+                        type: string
+
+        "400":
+          description: Dados invalidos ou confirmacao ausente.
+
+        "401":
+          description: Chave de API ausente ou invalida.
+
+        "404":
+          description: Produto nao encontrado nos favoritos.
+
+        "500":
+          description: Erro interno ao remover o favorito.
+
+components:
+  securitySchemes:
+    ReUseApiKey:
+      type: apiKey
+      in: header
+      name: X-ReUse-Extension-Key
